@@ -281,6 +281,7 @@ parser.add_argument('--min',type=int,required=False,default=1000,help="min separ
 parser.add_argument('--tgca',type=str,required=False,default="no",help="whether need TGCA")
 parser.add_argument('--tsd',type=str,required=False,default="no",help="whether need TSD")
 parser.add_argument('--model',type=str,required=True,help="path of model")
+parser.add_argument('--split',type=int,required=False,default=100,help="chromosome segmentation number")
 
 args = parser.parse_args()
 if __name__ == '__main__':
@@ -300,6 +301,7 @@ if __name__ == '__main__':
     max_len_threshold = args.max
     min_len_threshold = args.min
     tg_ca = args.tgca
+    split = args.split
     TSD = args.tsd
     total_win_len = 50000
     outputDir = args.output
@@ -314,7 +316,7 @@ if __name__ == '__main__':
     print("Begin to dectect LTR-RTs by model.")
     model_res = []
     for k,v in genome.items():
-        chr = fasta_to_onehot_to_predict(v,k,10,10000,model)
+        chr = fasta_to_onehot_to_predict(v,k,split,10000,model)
         model_res.append(chr)
     model = None
     
