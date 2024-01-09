@@ -14,6 +14,6 @@ pip3 install -r requirements.txt
 3.Usage
 
 ```
-python ltr_finder.py --genome example_genome.fasta --threads 8 --output output_directory --stride 5000 --max 20000 --min 5000 --max_ltr 8000 --min_ltr 200 --tgca yes --tsd no --model model_file.pkl --split 50
+python3 ltr_finder.py --genome <genome_file> --threads <num_threads> --output <output_path> --stride <stride_value> --max <max_distance> --min <min_distance> --max_ltr <max_ltr_length> --min_ltr <min_ltr_length> --tgca <tgca_option> --tsd <tsd_option> --model <model_path> --split <num_segments>
 ```
 
