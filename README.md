@@ -1,5 +1,4 @@
-# ltr_checker
-# A de-novo tool to annotate LTR-RT
+# LTR-checker: deep-learning guided structural identification of LTR retrotransposon providing decreased computation demand and high flexibility
 1. **Install**
 
 conda create -n ltr_checker python=3.8  
