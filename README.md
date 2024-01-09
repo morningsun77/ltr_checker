@@ -18,7 +18,8 @@ pip3 install -r requirements.txt
 python3 ltr_finder.py --genome <genome_file> --threads <num_threads> --output <output_path> --stride <stride_value> --max <max_distance> --min <min_distance> --max_ltr <max_ltr_length> --min_ltr <min_ltr_length> --tgca <tgca_option> --tsd <tsd_option> --model <model_path> --split <num_segments>
 ```
 
-4. **Options**  
+4. **Options**
+   
 **·** --genome: Path to the input genome file (required).
 
 **·** --threads: Number of threads to use (default=10).
