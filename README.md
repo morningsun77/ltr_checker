@@ -13,4 +13,4 @@ pip3 install -r requirements.txt
   
 3.Usage
 
-·python ltr_finder.py --genome example_genome.fasta --threads 8 --output output_directory --stride 5000 --max 20000 --min 5000 --max_ltr 8000 --min_ltr 200 --tgca yes --tsd no --model model_file.pkl --split 50·
+···python ltr_finder.py --genome example_genome.fasta --threads 8 --output output_directory --stride 5000 --max 20000 --min 5000 --max_ltr 8000 --min_ltr 200 --tgca yes --tsd no --model model_file.pkl --split 50···
