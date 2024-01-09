@@ -18,7 +18,7 @@ python3 ltr_finder.py --genome <genome_file> --threads <num_threads> --output <o
 ```
 
 4.Options  
-· --genome: Path to the input genome file (required).
+**·** --genome: Path to the input genome file (required).
 
 · --threads: Number of threads to use (default=10).
 
