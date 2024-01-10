@@ -7,6 +7,8 @@ conda activate ltr_checker
   
 pip3 install -r requirements.txt  
 
+conda install ltr_finder -c bioconda  
+
 2. **Workflow**
 
 ![image](https://github.com/morningsun77/ltr_checker/blob/main/Image/workflow%20of%20ltr_checker.png)
