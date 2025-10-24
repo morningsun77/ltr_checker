@@ -1,0 +1,22 @@
+{
+  "version": "1.2",
+  "dbname": "DNA_db",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/modules/../dataset/Tpases020812DNA.txt",
+  "number-of-letters": 1394362,
+  "number-of-sequences": 2341,
+  "last-updated": "2025-10-23T10:35:00",
+  "number-of-volumes": 1,
+  "bytes-total": 1837927,
+  "bytes-to-cache": 1415616,
+  "files": [
+    "DNA_db.pdb",
+    "DNA_db.phr",
+    "DNA_db.pin",
+    "DNA_db.pot",
+    "DNA_db.psq",
+    "DNA_db.ptf",
+    "DNA_db.pto"
+  ]
+}

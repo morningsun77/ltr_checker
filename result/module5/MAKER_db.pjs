@@ -1,0 +1,22 @@
+{
+  "version": "1.2",
+  "dbname": "MAKER_db",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/modules/../dataset/alluniRefprexp082813.txt",
+  "number-of-letters": 36803024,
+  "number-of-sequences": 102447,
+  "last-updated": "2025-10-23T10:35:00",
+  "number-of-volumes": 1,
+  "bytes-total": 54103966,
+  "bytes-to-cache": 37725240,
+  "files": [
+    "MAKER_db.pdb",
+    "MAKER_db.phr",
+    "MAKER_db.pin",
+    "MAKER_db.pot",
+    "MAKER_db.psq",
+    "MAKER_db.ptf",
+    "MAKER_db.pto"
+  ]
+}
