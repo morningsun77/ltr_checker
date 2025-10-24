@@ -3,7 +3,6 @@
 # Install PyTorch with CUDA support using:
 # pip install torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
 
-# Core Dependencies (from existing requirements.txt)
 asttokens==3.0.0
 biopython==1.85
 comm==0.2.2
