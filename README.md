@@ -99,7 +99,7 @@ Optional Arguments:
   --tgca TGCA           whether need TGCA, default=no
   --tsd TSD             whether need TSD, default=no
   --model MODEL         path of model
-  --split SPLIT         chromosome segmentation number, default=100
+  --split SPLIT         chromosome segmentation number, default=2
   --device DEVICE       cpu or cuda, default=cpu
   --software SOFTWARE   software to use: ltr_finder, ltr_harvest, ltrdetector, or all, default=ltr_finder
   --identity IDENTITY   minimum identity between 5' and 3' LTRs for LtrDetector, default=85
@@ -121,24 +121,13 @@ python ltr_checker.py \
 #### 2. Multi-Software Consensus
 ```bash
 # Run with each software
-python ltr_checker.py --genome genome.fasta --output ltr_finder.out --software ltr_finder
-python ltr_checker.py --genome genome.fasta --output ltr_harvest.out --software ltr_harvest
-python ltr_checker.py --genome genome.fasta --output ltrdetector.out --software ltrdetector
+python ltr_checker.py --genome genome.fasta --output output_dir --software ltr_finder
+python ltr_checker.py --genome genome.fasta --output output_dir --software ltr_harvest
+python ltr_checker.py --genome genome.fasta --output output_dir --software ltrdetector
 
-# Merge results (implementation-specific)
-```
+# Run with all software
+python ltr_checker.py --genome genome.fasta --output output_dir --software all
 
-#### 3. Custom Parameters
-```bash
-python ltr_checker.py \
-    --genome large_genome.fasta \
-    --output results/custom \
-    --software ltr_harvest \
-    --threads 32 \
-    --min-length 150 \
-    --max-length 5000 \
-    --similarity 0.85 \
-    --keep-intermediate
 ```
 
 ## Pipeline Workflow
@@ -185,17 +174,18 @@ Selected software (LTR_FINDER/LTR_HARVEST/LtrDetector) performs detailed structu
 ## Output Files
 ```
 output_dir/
-├── final_ltr_library.fasta          # High-confidence LTR-RT sequences
+├── ltr_candidates.fasta             # Initial LTR-RT candidates from CNN detection
+├── ltr_finder.out                   # LTR_FINDER results (if --software ltr_finder or all)
+├── ltr_harvest.out                  # LTR_HARVEST results (if --software ltr_harvest or all)
+├── ltr_detector.out                 # LtrDetector results (if --software ltrdetector or all)
+├── final_ltr_library.fasta          # High-confidence LTR-RT sequences (final output)
 ├── final_ltr_library.gff3           # Genomic coordinates and annotations
-├── classification_summary.txt       # Superfamily classification statistics
-├── protein_domains.txt              # Detailed protein domain annotations
-├── quality_metrics.txt              # Quality control statistics
-├── intermediate/                    # Intermediate files (if --keep-intermediate)
-│   ├── module1_output/
-│   ├── module2_output/
-│   └── ...
-└── logs/                            # Processing logs
-    └── ltr_checker.log
+├── module1/                         # Module 1: Initial Quality Filtering
+├── module2/                         # Module 2: LTR Boundary Refinement
+├── module3/                         # Module 3: Nested Insertion Detection
+├── module4/                         # Module 4: Protein Domain Annotation
+├── module5/                         # Module 5: Sequence Similarity Filtering
+├── module6/                         # Module 6: Final Cleanup and Validation
 ```
 
 ## Performance Considerations
