@@ -18,7 +18,7 @@ LTR_Checker is a sophisticated bioinformatics pipeline designed for the detectio
 ## Dependencies
 
 **Python 3.9+** with the following main packages:
-- PyTorch 1.10.1+ (with CUDA support optional)
+- PyTorch 1.11.0 (with CUDA support optional)
 - Biopython 1.85+
 - NumPy 1.24.3+
 - Pandas 2.2.3+
