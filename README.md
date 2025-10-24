@@ -82,18 +82,24 @@ Required Arguments:
   --output DIR            Output directory for results
 
 Optional Arguments:
-  --software {ltr_finder,ltr_harvest,ltrdetector}
-                          LTR detection software to use (default: ltr_finder)
-  --threads INT           Number of threads for parallel processing (default: 1)
-  --model PATH            Path to pre-trained CNN model (default: model/ltr_cnn.pth)
-  --min-length INT        Minimum LTR length (default: 100)
-  --max-length INT        Maximum LTR length (default: 6000)
-  --min-distance INT      Minimum distance between LTRs (default: 1000)
-  --max-distance INT      Maximum distance between LTRs (default: 15000)
-  --similarity FLOAT      Minimum LTR similarity threshold (default: 0.8)
-  --tsd-length INT        Target site duplication length (default: 5)
-  --skip-modules LIST     Comma-separated list of modules to skip (e.g., "1,3,5")
-  --keep-intermediate     Keep intermediate files for debugging
+  -h, --help            show this help message and exit
+  --genome GENOME       genome file
+  --threads THREADS     number of threads, default=10
+  --output OUTPUT       output path
+  --stride STRIDE       stride, default=10000
+  --max MAX             max separation distance of two LTR,default=15000
+  --min MIN             min separation distance of two LTR, default=1000
+  --max_ltr MAX_LTR     max length of LTR, default=7000
+  --min_ltr MIN_LTR     min length of LTR, default=100
+  --tgca TGCA           whether need TGCA, default=no
+  --tsd TSD             whether need TSD, default=no
+  --model MODEL         path of model
+  --split SPLIT         chromosome segmentation number, default=100
+  --device DEVICE       cpu or cuda, default=cpu
+  --software SOFTWARE   software to use: ltr_finder, ltr_harvest, ltrdetector, or all, default=ltr_finder
+  --identity IDENTITY   minimum identity between 5' and 3' LTRs for LtrDetector, default=85
+  --output_format OUTPUT_FORMAT, ltr_harvest, ltr_finder, ltrdetector and all.
+                        Unified output format when using --software all: ltr_harvest, ltr_finder, or ltrdetector, default=ltr_harvest
 ```
 
 ### Example Workflows
