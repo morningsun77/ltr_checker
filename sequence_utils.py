@@ -1,3 +1,5 @@
+from Bio import SeqIO
+
 # define a dict for genome (keys: chromosome's id, values: chromosome's sequence)
 def genome_dict(file):
     seqfile = [x for x in SeqIO.parse(file, 'fasta')]
