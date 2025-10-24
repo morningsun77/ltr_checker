@@ -17,9 +17,7 @@ LTR_Checker is a sophisticated bioinformatics pipeline designed for the detectio
 
 ## Dependencies
 
-### Required Software
-
-**Python 3.9+** with the following packages:
+**Python 3.9+** with the following main packages:
 - PyTorch 1.10.1+ (with CUDA support optional)
 - Biopython 1.85+
 - NumPy 1.24.3+
@@ -31,18 +29,21 @@ LTR_Checker is a sophisticated bioinformatics pipeline designed for the detectio
 
 ### External Tools
 
-- **LTR_FINDER**: For LTR retrotransposon detection
-- **LTR_HARVEST** (part of GenomeTools): For alternative LTR detection
-- **LtrDetector**: For additional LTR detection capabilities
-- **BLAST+**: For sequence alignment and comparison
-- **HMMER**: For protein domain annotation (hmmsearch)
-- **TRF (Tandem Repeats Finder)**: For tandem repeat detection
+- **TRF (Tandem Repeats Finder) 4.10.0** - Tandem repeat detection
+- **BLAST+ (RMBlast variant) 2.14.1+** - Sequence alignment and comparison
+- **HMMER 3.4** - Protein domain annotation (hmmsearch)
+- **EMBOSS 6.6.0.0** - Sequence analysis utilities
+- **RepeatMasker 4.1.8** - Repeat sequence masking
+- **LTR_FINDER 1.07** - LTR retrotransposon detection
+- **GenomeTools 1.6.6** (includes LTR_HARVEST) - Alternative LTR retrotransposon detection
+- **LtrDetector** - Additional LTR retrotransposon detection capabilities
+- **MUSCLE 5.1.0**
 
 ### Database Files (Included)
 
-- `REXdb_protein_database_viridiplantae_v3.0.hmm`: HMM profiles for plant LTR-RT protein domains
-- `TEfam.hmm`: Transposable element family profiles
-- `Tpases020812DNA.txt` and `Tpases020812LINE.txt`: Transposase reference sequences
+- `REXdb_protein_database_viridiplantae_v3.0.hmm` - HMM profiles for plant LTR-RT protein domains
+- `TEfam.hmm` - Transposable element family profiles
+- `Tpases020812DNA.txt` and `Tpases020812LINE.txt` - Transposase reference sequences
 
 ## Installation
 
@@ -54,22 +55,24 @@ cd ltr_checker
 
 ### 2. Install Python Dependencies
 ```bash
+conda create -n ltr_checker python=3.9
+conda activate ltr_checker
 pip install -r requirements.txt
 ```
 
 ### 3. Install External Tools
 
-Ensure that all external tools (LTR_FINDER, GenomeTools, LtrDetector, BLAST+, HMMER, TRF) are installed and accessible in your system PATH.
+Ensure all external tools listed above are installed and accessible in your system PATH.
 
 ### 4. Prepare Database Files
 
-The required HMM profiles and reference sequences should be placed in the `dataset/` directory.
+Place the required HMM profiles and reference sequences in the `dataset/` directory.
 
 ## Usage
 
 ### Basic Command
 ```bash
-python ltr_checker.py --genome input.fasta --output output_dir --software ltr_finder --threads 8
+python ltr_checker.py --genome input.fasta --output output_dir
 ```
 
 ### Command-Line Options
