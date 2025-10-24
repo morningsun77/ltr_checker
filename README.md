@@ -60,11 +60,16 @@ conda activate ltr_checker
 pip install -r requirements.txt
 ```
 
-### 3. Install External Tools
+### 3. Install PyTorch with CUDA Support
+```bash
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
+```
 
-Ensure all external tools listed above are installed and accessible in your system PATH.
+### 4. Install External Tools
 
-### 4. Prepare Database Files
+Ensure all external tools listed above are installed and accessible in your system path.
+
+### 5. Prepare Database Files
 
 Place the required HMM profiles and reference sequences in the `dataset/` directory.
 
