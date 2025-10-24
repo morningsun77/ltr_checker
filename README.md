@@ -112,21 +112,24 @@ Optional Arguments:
 #### 1. Basic Detection with LTR_FINDER
 ```bash
 python ltr_checker.py \
-    --genome genome.fasta \
+    --genome test/test.fa \
     --output ./results \
     --software ltr_finder \
-    --threads 16
+    --threads 10
 ```
 
 #### 2. Multi-Software Consensus
 ```bash
 # Run with each software
-python ltr_checker.py --genome genome.fasta --output output_dir --software ltr_finder
-python ltr_checker.py --genome genome.fasta --output output_dir --software ltr_harvest
-python ltr_checker.py --genome genome.fasta --output output_dir --software ltrdetector
+python ltr_checker.py --genome test/test.fa --output output_dir --software ltr_finder
+python ltr_checker.py --genome test/test.fa --output output_dir --software ltr_harvest
+python ltr_checker.py --genome test/test.fa --output output_dir --software ltrdetector
 
 # Run with all software
-python ltr_checker.py --genome genome.fasta --output output_dir --software all
+python ltr_checker.py --genome test/test.fa --output output_dir --software all
+
+
+### 3.
 
 ```
 
