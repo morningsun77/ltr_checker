@@ -1,3 +1,9 @@
+# LTR Checker - Complete Requirements
+# Generated from analysis of all Python scripts and Jupyter notebooks
+# Install PyTorch with CUDA support using:
+# pip install torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+
+# Core Dependencies (from existing requirements.txt)
 asttokens==3.0.0
 biopython==1.85
 comm==0.2.2
@@ -40,9 +46,6 @@ scipy==1.13.1
 seaborn==0.13.2
 six==1.17.0
 stack-data==0.6.3
-torch==1.10.1+cu111
-torchaudio==0.10.1+cu111
-torchvision==0.11.2+cu111
 tornado==6.5.1
 tqdm==4.67.1
 traitlets==5.14.3
@@ -50,3 +53,4 @@ typing_extensions==4.13.2
 tzdata==2025.2
 wcwidth==0.2.13
 zipp==3.23.0
+scikit-learn>=1.0.0
