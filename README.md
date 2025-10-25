@@ -6,15 +6,6 @@
 
 LTR_Checker is a sophisticated bioinformatics pipeline designed for the detection, annotation, and analysis of Long Terminal Repeat (LTR) retrotransposons in genomic sequences. The tool integrates CNN detection with multiple established LTR annotation software and employs a rigorous six-module filtering and validation system to ensure high-quality results.
 
-## Features
-
-- **Deep Learning Detection**: Uses a PyTorch-based convolutional neural network (CNN) model for initial LTR-RT detection
-- **Multi-Software Integration**: Supports LTR_FINDER, LTR_HARVEST, and LtrDetector for comprehensive annotation
-- **Six-Module Quality Control Pipeline**: Comprehensive filtering and validation system
-- **Protein Domain Classification**: Automatic classification into Copia, Gypsy, or Unknown superfamilies
-- **Sequence Similarity Filtering**: Removes redundant and highly similar elements
-- **Final Validation**: Multi-step cleanup to eliminate false positives
-
 ## Dependencies
 
 **Python 3.9+** with the following main packages:
