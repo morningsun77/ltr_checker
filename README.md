@@ -171,8 +171,8 @@ output_dir/
 ├── ltr_finder.out                   # LTR_FINDER results (if --software ltr_finder or all)
 ├── ltr_harvest.out                  # LTR_HARVEST results (if --software ltr_harvest or all)
 ├── ltr_detector.out                 # LtrDetector results (if --software ltrdetector or all)
-├── final_ltr_library.fasta          # High-confidence LTR-RT sequences (final output)
-├── final_ltr_library.gff3           # Genomic coordinates and annotations
+├── final_ltr_rt.fasta          # High-confidence LTR-RT sequences (final output)
+├── final_ltr_rt.gff3           # Genomic coordinates and annotations
 ├── module1/                         # Module 1: Initial Quality Filtering
 ├── module2/                         # Module 2: LTR Boundary Refinement
 ├── module3/                         # Module 3: Nested Insertion Detection
