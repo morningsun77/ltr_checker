@@ -79,9 +79,7 @@ Required Arguments:
 
 Optional Arguments:
   -h, --help            show this help message and exit
-  --genome GENOME       genome file
   --threads THREADS     number of threads, default=10
-  --output OUTPUT       output path
   --stride STRIDE       stride, default=10000
   --max MAX             max separation distance of two LTR,default=15000
   --min MIN             min separation distance of two LTR, default=1000
