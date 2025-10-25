@@ -1,6 +1,6 @@
-# LTR_Checker
+# LTR_checker
 
-**LTR-checker: deep-learning (DL) guided ensemble structural identification of LTR retrotransposon in plant genomes**
+**LTR_checker: deep-learning (DL) guided ensemble structural identification of LTR retrotransposon in plant genomes**
 
 ## Overview
 
