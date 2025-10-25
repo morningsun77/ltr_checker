@@ -127,11 +127,19 @@ python ltr_checker.py --genome test/test.fa --output output_dir --software ltrde
 
 # Run with all software
 python ltr_checker.py --genome test/test.fa --output output_dir --software all
-
-
-### 3.
-
 ```
+
+#### 3. Skip Quality Control Filtering
+```bash
+python ltr_checker.py \
+    --genome test/test.fa \
+    --output ./results \
+    --software all \
+    --filter no \
+    --threads 10
+```
+
+**Note**: The `--filter` parameter controls whether to apply the six-module quality control pipeline (default: `yes`). Setting `--filter no` skips all filtering modules and directly outputs results from the selected software (ltr_finder.out, ltr_harvest.out, and/or ltr_detector.out). This option is faster but may include more false positives.
 
 ## Pipeline Workflow
 
