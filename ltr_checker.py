@@ -39,10 +39,11 @@ parser.add_argument('--min_ltr',type=int,required=False,default=100,help="min le
 parser.add_argument('--tgca',type=str,required=False,default="no",help="whether need TGCA, default=no")
 parser.add_argument('--tsd',type=str,required=False,default="no",help="whether need TSD, default=no")
 parser.add_argument('--model',type=str,required=False,help="path of model")
-parser.add_argument('--split',type=int,required=False,default=100,help="chromosome segmentation number, default=100")
+parser.add_argument('--split',type=int,required=False,default=2,help="chromosome segmentation number, default=2")
 parser.add_argument('--device',type=str,required=False,default="cpu",help="cpu or cuda, default=cpu")
 parser.add_argument('--software',type=str,required=False,default="ltr_finder",help="software to use: ltr_finder, ltr_harvest, ltrdetector, or all, default=ltr_finder")
 parser.add_argument('--identity', type=int, required=False, default=85, help="minimum identity between 5' and 3' LTRs for LtrDetector, default=85")
+parser.add_argument('--filter',type=str,required=False,default="yes",help="whether to run filtering modules (Module 1-6), options: yes/no, default=yes")
 parser.add_argument('--output_format',type=str,required=False,default="ltr_harvest",help="unified output format when using --software all: ltr_harvest, ltr_finder, or ltrdetector, default=ltr_harvest")
 args = parser.parse_args()
 
@@ -72,6 +73,8 @@ if __name__ == '__main__':
     total_win_len = 50000
     outputDir = args.output
     outputDir = os.path.abspath(outputDir)
+    if not os.path.exists(outputDir):
+        os.makedirs(outputDir)
     if args.model:
         model_path = os.path.abspath(args.model)
     else:
@@ -79,6 +82,7 @@ if __name__ == '__main__':
         model_path = os.path.join(script_dir, 'model', 'model_cnn.pth')
     identity = args.identity
     output_format = args.output_format.lower()
+    run_filter = args.filter.lower()
     
     # Validate software selection
     if software not in ["ltr_finder", "ltr_harvest", "ltrdetector", "all"]:
@@ -247,243 +251,247 @@ if __name__ == '__main__':
     input_fasta = ltr_candidates_fasta
     genome_file = args.genome
 
-    ## Module1
-    print("\n" + "="*50)
-    print("Module 1: Initial Quality Filtering")
-    print("="*50)
-    print("Starting initial quality filtering of LTR-RT candidates...")
-    print(f"  - Filtering candidates with excessive gaps (N's)")
-    print(f"  - Removing tandem repeats")
-    print(f"  - Validating internal region lengths")
-    print(f"  - Checking LTR:internal region ratios")
-    filter_module = LTRModule1(
-        max_gap_size=10,              # Max consecutive N length allowed
-        min_internal_len=100,         # Min internal region length
-        max_internal_len=15000,       # Max internal region length
-        min_ltr_internal_ratio=0.05,  # Min LTR:internal ratio
-        max_ltr_internal_ratio=50.0,  # Max LTR:internal ratio
-        trf_output_dir="./trf_results"  # TRF results output directory
-    )
-    dir_1 = dir + "/module1"
-    output_1 = dir_1 + "/module1.fasta"
-    if not os.path.exists(dir_1):
-        os.makedirs(dir_1)
-    
-    try:
-        filter_module.filter_candidates(input_fasta, output_1)
-        temp_dir = os.getcwd() + "/trf_results"
-        os.rmdir(temp_dir)  # Remove TRF results directory
-    except Exception as e:
-        logging.error(f"Filtering process error: {e}")
-        raise
-
-    ## Module2
-    print("\n" + "="*50)
-    print("Module 2: LTR Boundary Refinement")
-    print("="*50)
-    print("Refining LTR boundaries using BLAST alignment...")
-    print(f"  - Aligning left and right LTRs")
-    print(f"  - Adjusting boundaries based on alignment results")
-    print(f"  - Validating refined boundaries")
-    dir_2 = dir + "/module2"
-    if not os.path.exists(dir_2):
-        os.makedirs(dir_2)
-    input_2_fa = output_1
-
-    processor = Module2(
-        genome_file,
-        blast_path="blastn",  # If in PATH, can use program name directly
-        makeblastdb_path="makeblastdb"
-    )
-    processor.process_ltrs(input_2_fa, dir_2)
-
-    ## Module3
-    print("\n" + "="*50)
-    print("Module 3: Nested Insertion Detection and Filtering")
-    print("="*50)
-    print("Detecting and filtering nested LTR insertions...")
-    print(f"  - Checking for nested insertions")
-    print(f"  - Removing redundant elements")
-    print(f"  - Validating element integrity")
-    dir_3 = dir + "/module3"
-    if not os.path.exists(dir_3):
-        os.makedirs(dir_3)
-
-    input_3_fa = dir_2 + "/boundary_modified.fasta"
-    
-    ltr = Module3(genome_file, input_3_fa, dir_3, r=1.3e-8)
-    ltr.process()
-
-    ## Module4
-    print("\n" + "="*50)
-    print("Module 4: Protein Domain Annotation and Classification")
-    print("="*50)
-    print("Annotating protein domains and classifying LTR-RTs...")
-    print(f"  - Searching for RT, INT, GAG, and other domains")
-    print(f"  - Classifying elements as Copia, Gypsy, or Unknown")
-    print(f"  - Generating domain position maps")
-    dir_4 = dir + "/module4"
-    if not os.path.exists(dir_4):
-        os.makedirs(dir_4)
-    input_4_fa = dir_3 + "/passed.fa"
-    input_4_tsv = dir_4 + "/ltr_rt_annotation"
-    output_4_tsv = dir_4 + "/ltr_rt_annotation_domains.tsv"
-    output_4_res = dir_4 + "/domain_analysis_results.tsv"
-    if not os.path.exists(input_fasta):
-        raise FileNotFoundError(f"Input file not found: {input_fasta}")
+    # Check if filtering modules should be run
+    if run_filter == "no":
+        end_time = time.time()
+    else:
+        ## Module1
+        print("\n" + "="*50)
+        print("Module 1: Initial Quality Filtering")
+        print("="*50)
+        print("Starting initial quality filtering of LTR-RT candidates...")
+        print(f"  - Filtering candidates with excessive gaps (N's)")
+        print(f"  - Removing tandem repeats")
+        print(f"  - Validating internal region lengths")
+        print(f"  - Checking LTR:internal region ratios")
+        filter_module = LTRModule1(
+            max_gap_size=10,              # Max consecutive N length allowed
+            min_internal_len=100,         # Min internal region length
+            max_internal_len=15000,       # Max internal region length
+            min_ltr_internal_ratio=0.05,  # Min LTR:internal ratio
+            max_ltr_internal_ratio=50.0,  # Max LTR:internal ratio
+            trf_output_dir="./trf_results"  # TRF results output directory
+        )
+        dir_1 = dir + "/module1"
+        output_1 = dir_1 + "/module1.fasta"
+        if not os.path.exists(dir_1):
+            os.makedirs(dir_1)
         
-    print(f"Input file: {input_fasta}")
-    print(f"File size: {os.path.getsize(input_fasta)} bytes")
-    
-    # Create annotator instance and run annotation
-    annotator = DomainAnnotator()
-    annotator.annotate_ltr_rt(input_4_fa, input_4_tsv)
+        try:
+            filter_module.filter_candidates(input_fasta, output_1)
+            temp_dir = os.getcwd() + "/trf_results"
+            os.rmdir(temp_dir)  # Remove TRF results directory
+        except Exception as e:
+            logging.error(f"Filtering process error: {e}")
+            raise
 
-    classifier = LTRClassifier()
+        ## Module2
+        print("\n" + "="*50)
+        print("Module 2: LTR Boundary Refinement")
+        print("="*50)
+        print("Refining LTR boundaries using BLAST alignment...")
+        print(f"  - Aligning left and right LTRs")
+        print(f"  - Adjusting boundaries based on alignment results")
+        print(f"  - Validating refined boundaries")
+        dir_2 = dir + "/module2"
+        if not os.path.exists(dir_2):
+            os.makedirs(dir_2)
+        input_2_fa = output_1
 
-    try:
-        # Read input file
-        df = pd.read_csv(output_4_tsv, sep='\t')
-        print(f"Successfully read file: {output_4_tsv}")
-        print(f"Number of data rows: {len(df)}")
+        processor = Module2(
+            genome_file,
+            blast_path="blastn",  # If in PATH, can use program name directly
+            makeblastdb_path="makeblastdb"
+        )
+        processor.process_ltrs(input_2_fa, dir_2)
 
-        # Process data
-        results = classifier.process_ltr_data(df)
+        ## Module3
+        print("\n" + "="*50)
+        print("Module 3: Nested Insertion Detection and Filtering")
+        print("="*50)
+        print("Detecting and filtering nested LTR insertions...")
+        print(f"  - Checking for nested insertions")
+        print(f"  - Removing redundant elements")
+        print(f"  - Validating element integrity")
+        dir_3 = dir + "/module3"
+        if not os.path.exists(dir_3):
+            os.makedirs(dir_3)
 
-        # Output results
-        print("\nLTR retrotransposon classification results:")
-        print("-" * 80)
+        input_3_fa = dir_2 + "/boundary_modified.fasta"
         
-        if results:
-            # Create output DataFrame (results are already sorted)
-            output_df = pd.DataFrame(results)[['Sequence_ID', 'Classification', 'Domain_count', 'Domain_positions']]
+        ltr = Module3(genome_file, input_3_fa, dir_3, r=1.3e-8)
+        ltr.process()
 
-            # Print to console
-            for result in results:
-                print(f"Sequence ID: {result['Sequence_ID']}")
-                print(f"Classification: {result['Classification']}")
-                print(f"Domain count: {result['Domain_count']}")
-                print(f"Domain positions: {result['Domain_positions']}")
-                print("-" * 80)
+        ## Module4
+        print("\n" + "="*50)
+        print("Module 4: Protein Domain Annotation and Classification")
+        print("="*50)
+        print("Annotating protein domains and classifying LTR-RTs...")
+        print(f"  - Searching for RT, INT, GAG, and other domains")
+        print(f"  - Classifying elements as Copia, Gypsy, or Unknown")
+        print(f"  - Generating domain position maps")
+        dir_4 = dir + "/module4"
+        if not os.path.exists(dir_4):
+            os.makedirs(dir_4)
+        input_4_fa = dir_3 + "/passed.fa"
+        input_4_tsv = dir_4 + "/ltr_rt_annotation"
+        output_4_tsv = dir_4 + "/ltr_rt_annotation_domains.tsv"
+        output_4_res = dir_4 + "/domain_analysis_results.tsv"
+        if not os.path.exists(input_fasta):
+            raise FileNotFoundError(f"Input file not found: {input_fasta}")
+            
+        print(f"Input file: {input_fasta}")
+        print(f"File size: {os.path.getsize(input_fasta)} bytes")
+        
+        # Create annotator instance and run annotation
+        annotator = DomainAnnotator()
+        annotator.annotate_ltr_rt(input_4_fa, input_4_tsv)
 
-            # Save to file
-            if output_4_res:
-                output_df.to_csv(output_4_res, sep='\t', index=False)
-                print(f"\nResults saved to: {output_4_res}")
+        classifier = LTRClassifier()
+
+        try:
+            # Read input file
+            df = pd.read_csv(output_4_tsv, sep='\t')
+            print(f"Successfully read file: {output_4_tsv}")
+            print(f"Number of data rows: {len(df)}")
+
+            # Process data
+            results = classifier.process_ltr_data(df)
+
+            # Output results
+            print("\nLTR retrotransposon classification results:")
+            print("-" * 80)
+            
+            if results:
+                # Create output DataFrame (results are already sorted)
+                output_df = pd.DataFrame(results)[['Sequence_ID', 'Classification', 'Domain_count', 'Domain_positions']]
+
+                # Print to console
+                for result in results:
+                    print(f"Sequence ID: {result['Sequence_ID']}")
+                    print(f"Classification: {result['Classification']}")
+                    print(f"Domain count: {result['Domain_count']}")
+                    print(f"Domain positions: {result['Domain_positions']}")
+                    print("-" * 80)
+
+                # Save to file
+                if output_4_res:
+                    output_df.to_csv(output_4_res, sep='\t', index=False)
+                    print(f"\nResults saved to: {output_4_res}")
+                else:
+                    print("\nOutput table:")
+                    print(output_df.to_string(index=False))
+
+                # Statistics
+                print(f"\nStatistics:")
+                print(f"Total sequences: {len(results)}")
+                print(f"Copia: {sum(1 for r in results if r['Classification'] == 'Copia')}")
+                print(f"Gypsy: {sum(1 for r in results if r['Classification'] == 'Gypsy')}")
+                print(f"Unknown: {sum(1 for r in results if r['Classification'] == 'unknown')}")
+                print(f"\nNote: Results are sorted in ascending order by LTR ID (e.g., LTR_1, LTR_2, LTR_10...)")
+
             else:
-                print("\nOutput table:")
-                print(output_df.to_string(index=False))
-
-            # Statistics
-            print(f"\nStatistics:")
-            print(f"Total sequences: {len(results)}")
-            print(f"Copia: {sum(1 for r in results if r['Classification'] == 'Copia')}")
-            print(f"Gypsy: {sum(1 for r in results if r['Classification'] == 'Gypsy')}")
-            print(f"Unknown: {sum(1 for r in results if r['Classification'] == 'unknown')}")
-            print(f"\nNote: Results are sorted in ascending order by LTR ID (e.g., LTR_1, LTR_2, LTR_10...)")
-
-        else:
-            print("No sequences met the criteria (at least 3 domains required)")
-            if output_4_res:
-                # Create empty file
-                with open(output_4_res, 'w') as f:
-                    f.write("Sequence_ID\tClassification\tDomain_count\tDomain_positions\n")
-                    
-    except FileNotFoundError:
-        print(f"错误：找不到文件 {output_4_tsv}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"错误：处理文件时出错 - {str(e)}")
-        sys.exit(1)
+                print("No sequences met the criteria (at least 3 domains required)")
+                if output_4_res:
+                    # Create empty file
+                    with open(output_4_res, 'w') as f:
+                        f.write("Sequence_ID\tClassification\tDomain_count\tDomain_positions\n")
+                        
+        except FileNotFoundError:
+            print(f"错误：找不到文件 {output_4_tsv}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"错误：处理文件时出错 - {str(e)}")
+            sys.exit(1)
 
 
-    ## Module5 
-    print("\n" + "="*50)
-    print("Module 5: Sequence Similarity Filtering")
-    print("="*50)
-    print("Filtering highly similar sequences...")
-    print(f"  - Clustering sequences by similarity")
-    print(f"  - Removing redundant sequences")
-    print(f"  - Keeping representative sequences from each cluster")
-    dir_5 = dir + "/module5"
-    if not os.path.exists(dir_5):
-        os.makedirs(dir_5)
-    output_4_fa = dir_4 + '/output_sequences.fasta'
-    input_5_fa = output_4_fa
-    with open(output_4_res, 'r') as f:
-        ltr_ids = f.readlines()[1:]  # begin from second line
-        ltr_ids = [line.split('\t')[0] for line in ltr_ids]
-    with open(input_fasta, 'r') as f:
-        content = f.read()
+        ## Module5 
+        print("\n" + "="*50)
+        print("Module 5: Sequence Similarity Filtering")
+        print("="*50)
+        print("Filtering highly similar sequences...")
+        print(f"  - Clustering sequences by similarity")
+        print(f"  - Removing redundant sequences")
+        print(f"  - Keeping representative sequences from each cluster")
+        dir_5 = dir + "/module5"
+        if not os.path.exists(dir_5):
+            os.makedirs(dir_5)
+        output_4_fa = dir_4 + '/output_sequences.fasta'
+        input_5_fa = output_4_fa
+        with open(output_4_res, 'r') as f:
+            ltr_ids = f.readlines()[1:]  # begin from second line
+            ltr_ids = [line.split('\t')[0] for line in ltr_ids]
+        with open(input_fasta, 'r') as f:
+            content = f.read()
 
-    sequences = extract_sequences_by_ids(content, ltr_ids)
-    write_sequences_to_file(sequences, output_4_fa)
-    try:
-        filter = LTRFilter(input_5_fa, dir_5)
-        filter.run()
-    except Exception as e:
-        print(f"Program execution failed: {str(e)}")
+        sequences = extract_sequences_by_ids(content, ltr_ids)
+        write_sequences_to_file(sequences, output_4_fa)
+        try:
+            filter = LTRFilter(input_5_fa, dir_5)
+            filter.run()
+        except Exception as e:
+            print(f"Program execution failed: {str(e)}")
 
-    ## Module6
-    print("\n" + "="*50)
-    print("Module 6: Final Cleanup and Validation")
-    print("="*50)
-    print("Performing final cleanup and validation...")
-    print(f"  - Removing false positives")
-    print(f"  - Final quality check")
-    print(f"  - Generating final LTR-RT library")
-    dir_6 = dir + "/module6"
-    if not os.path.exists(dir_6):
-        os.makedirs(dir_6)
-    input_6_fa = dir_5 + "/filtered.fasta"
+        ## Module6
+        print("\n" + "="*50)
+        print("Module 6: Final Cleanup and Validation")
+        print("="*50)
+        print("Performing final cleanup and validation...")
+        print(f"  - Removing false positives")
+        print(f"  - Final quality check")
+        print(f"  - Generating final LTR-RT library")
+        dir_6 = dir + "/module6"
+        if not os.path.exists(dir_6):
+            os.makedirs(dir_6)
+        input_6_fa = dir_5 + "/filtered.fasta"
 
-    ltr_ids = []
-    with open(dir_2 + '/boundary_results.tsv','r') as file:
-        # Skip the first line
-        next(file)
+        ltr_ids = []
+        with open(dir_2 + '/boundary_results.tsv','r') as file:
+            # Skip the first line
+            next(file)
 
-        # Read the remaining lines
-        for line in file:
-            # Split each line into columns
-            columns = line.strip().split()  # Split by whitespace by default; modify if using a different delimiter
+            # Read the remaining lines
+            for line in file:
+                # Split each line into columns
+                columns = line.strip().split()  # Split by whitespace by default; modify if using a different delimiter
 
-            # Ensure the line has at least 7 columns
-            if len(columns) >= 7:
-                # Check if the 7th column is 'pass'
-                if columns[6] == 'pass' or columns[6]== "truncated":
-                    # Add the 1st column to the list
-                    ltr_ids.append(columns[0])
-    sequences = extract_sequences_by_ids(content, ltr_ids)
-    library_LTR_RT_file = dir_5 + "/LTR_library.fa"
-    library_file = dir_5 + "/LTRs_library.fa"
-    output_6_pa = dir_6 + '/final_output.fasta'
-    write_sequences_to_file(sequences, library_LTR_RT_file)
-    extract_ltr_sequences(library_LTR_RT_file, library_file)
+                # Ensure the line has at least 7 columns
+                if len(columns) >= 7:
+                    # Check if the 7th column is 'pass'
+                    if columns[6] == 'pass' or columns[6]== "truncated":
+                        # Add the 1st column to the list
+                        ltr_ids.append(columns[0])
+        sequences = extract_sequences_by_ids(content, ltr_ids)
+        library_LTR_RT_file = dir_5 + "/LTR_library.fa"
+        library_file = dir_5 + "/LTRs_library.fa"
+        output_6_pa = dir_6 + '/final_output.fasta'
+        write_sequences_to_file(sequences, library_LTR_RT_file)
+        extract_ltr_sequences(library_LTR_RT_file, library_file)
 
-    cleaner = LTRCleaner(genome_file=genome_file, 
-                         candidates_file=input_6_fa, 
-                         library_file=library_file, 
-                         output_dir=dir_6)
-    cleaner.clean()
+        cleaner = LTRCleaner(genome_file=genome_file, 
+                            candidates_file=input_6_fa, 
+                            library_file=library_file, 
+                            output_dir=dir_6)
+        cleaner.clean()
 
-    ltr_ids = []
-    with open(dir_6 + '/LTR_processing_log.tsv','r') as file:
-        # Skip the first line
-        next(file)
+        ltr_ids = []
+        with open(dir_6 + '/LTR_processing_log.tsv','r') as file:
+            # Skip the first line
+            next(file)
 
-        # Read the remaining lines
-        for line in file:
-            # Split each line into columns
-            columns = line.strip().split()  # Split by whitespace by default; modify if using a different delimiter
+            # Read the remaining lines
+            for line in file:
+                # Split each line into columns
+                columns = line.strip().split()  # Split by whitespace by default; modify if using a different delimiter
 
-            # Ensure the line has at least 7 columns
-            if len(columns) >= 7:
-                # Check if the 7th column is 'pass'
-                if columns[0] == 'PASS':
-                    # Add the 1st column to the list
-                    ltr_ids.append(columns[0])
-    sequences = extract_sequences_by_ids(content, ltr_ids)
-    write_sequences_to_file(sequences, output_6_pa)
+                # Ensure the line has at least 7 columns
+                if len(columns) >= 7:
+                    # Check if the 7th column is 'pass'
+                    if columns[0] == 'PASS':
+                        # Add the 1st column to the list
+                        ltr_ids.append(columns[0])
+        sequences = extract_sequences_by_ids(content, ltr_ids)
+        write_sequences_to_file(sequences, output_6_pa)
 
-    end_time = time.time()
-    print("ltr_checker cost {} s.".format(end_time - start_time))
+        end_time = time.time()
+        print("ltr_checker cost {} s.".format(end_time - start_time))
