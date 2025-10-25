@@ -100,16 +100,7 @@ Optional Arguments:
 
 ### Example Workflows
 
-#### 1. Basic Detection with LTR_FINDER
-```bash
-python ltr_checker.py \
-    --genome test/test.fa \
-    --output ./results \
-    --software ltr_finder \
-    --threads 10
-```
-
-#### 2. Multi-Software Consensus
+#### 1. Single or Ensemble Software identification
 ```bash
 # Run with each software
 python ltr_checker.py --genome test/test.fa --output output_dir --software ltr_finder
@@ -119,15 +110,15 @@ python ltr_checker.py --genome test/test.fa --output output_dir --software ltrde
 # Run with all software
 python ltr_checker.py --genome test/test.fa --output output_dir --software all
 ```
+**Note**: A single software tool can be selected, or all three software tools can be combined together. Using `--software all` provides more comprehensive results by integrating predictions from LTR_FINDER, LTR_HARVEST, and LtrDetector, which can improve detection accuracy and coverage.
 
-#### 3. Skip Quality Control Filtering
+#### 2. Skip Quality Control Filtering
 ```bash
 python ltr_checker.py \
     --genome test/test.fa \
     --output ./results \
     --software all \
     --filter no \
-    --threads 10
 ```
 
 **Note**: The `--filter` parameter controls whether to apply the six-module quality control pipeline (default: `yes`). Setting `--filter no` skips all filtering modules and directly outputs results from the selected software (ltr_finder.out, ltr_harvest.out, and/or ltr_detector.out). This option is faster but may include more false positives.
