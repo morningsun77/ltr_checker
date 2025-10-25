@@ -98,7 +98,7 @@ Optional Arguments:
                         Unified output format when using --software all: ltr_harvest, ltr_finder, or ltrdetector, default=ltr_harvest
 ```
 
-### Example Workflows
+### Example
 
 #### 1. Single or Ensemble Software identification
 ```bash
