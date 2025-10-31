@@ -90,9 +90,9 @@ Optional Arguments:
   --model MODEL         path to the CNN model for LTR-RT identification
   --split SPLIT         how many chromosme segments you want to split into, default=2
   --device DEVICE       cpu or cuda, default=cpu
-  --method MRTHOD       method to use: ltr_finder, ltr_harvest, ltrdetector, or all, default=ltr_finder
+  --method METHOD       method to use: ltr_finder, ltr_harvest, ltrdetector, or all, default=ltr_finder
   --identity IDENTITY   minimum identity between 5' and 3' LTRs for LtrDetector, default=85
-  --filter FILTER       whether to run filtering modules (Module 1-6), options: yes/no, default=yes
+  --filter FILTER       whether to run filtering modules (Module 1-6，as implemented in ltr_checker_validator, https://github.com/morningsun77/ltr_checker_validator), options: yes/no, default=yes
   --output_format OUTPUT_FORMAT, ltr_harvest, ltr_finder, ltrdetector and all.
                         Unified output format when using --method all: ltr_harvest, ltr_finder, or ltrdetector, default=ltr_harvest
 ```
