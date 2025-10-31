@@ -4,7 +4,7 @@
 
 ## Overview
 
-LTR_Checker is a sophisticated bioinformatics pipeline designed for the detection, annotation, and analysis of Long Terminal Repeat retrotransposons (LTR-RTs) in genomic sequences. The tool integrates CNN detection with multiple established LTR-RT identification methods and employs a rigorous six-module filtering and validation procedure to ensure high-quality results.
+LTR_checker is a sophisticated bioinformatics pipeline designed for the detection, annotation, and analysis of Long Terminal Repeat retrotransposons (LTR-RTs) in genomic sequences. The tool integrates CNN detection with multiple established LTR-RT identification methods and employs a rigorous six-module filtering and validation procedure to ensure high-quality results.
 
 ## Dependencies
 
