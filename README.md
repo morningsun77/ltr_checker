@@ -163,7 +163,7 @@ output_dir/
 ## Performance Considerations
 
 - **Memory Usage**: Proportional to genome size and number of threads
-- **Runtime**: Depends on genome size, number of candidates, and selected software
+- **Runtime**: Depends on genome size, number of candidates, and selected method
 - **GPU Support**: Optional CUDA support for CNN inference
 - **Disk Space**: Requires temporary space for intermediate files
 
