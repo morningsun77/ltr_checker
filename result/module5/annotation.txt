@@ -1,0 +1,1 @@
+#Sequence_ID	Status	Reason	Length	Coverage	Has_LTR_coords

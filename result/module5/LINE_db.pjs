@@ -1,0 +1,22 @@
+{
+  "version": "1.2",
+  "dbname": "LINE_db",
+  "dbtype": "Protein",
+  "db-version": 5,
+  "description": "/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/modules/../dataset/Tpases020812LINE.txt",
+  "number-of-letters": 1876363,
+  "number-of-sequences": 2330,
+  "last-updated": "2025-10-23T10:35:00",
+  "number-of-volumes": 1,
+  "bytes-total": 2284180,
+  "bytes-to-cache": 1897526,
+  "files": [
+    "LINE_db.pdb",
+    "LINE_db.phr",
+    "LINE_db.pin",
+    "LINE_db.pot",
+    "LINE_db.psq",
+    "LINE_db.ptf",
+    "LINE_db.pto"
+  ]
+}

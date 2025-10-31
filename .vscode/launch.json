@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--genome","/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/test/test.fa",
+                "--output","/proj/nobackup/hpc2nstor2024-028/zhychen/bin/copy/githup/ltr_checker/result",
+                "--method","all",
+                "--stride","10000",
+                "--output_format","ltr_harvest"
+            ]
+        }
+    ]
+}
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "Python Debugger: Current File",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "program": "${file}",
+//             "console": "integratedTerminal",
+//             "args": [
+//                 "--genome","/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/test/test.fasta",
+//                 "--output","/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/result",
+//                 "--sequence","/proj/nobackup/hpc2nstor2024-028/zhychen/bin/software/ltr_checker/result/ltr_candidates.fasta"
+
+//             ]
+//         }
+//     ]
+// }
