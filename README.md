@@ -135,11 +135,11 @@ Selected method (LTR_FINDER/LTR_HARVEST/LtrDetector) performs detailed structura
 ### Stage 3: Six-Module Quality Control
 
 **Module 1: Removal of gapped sequences, tandem repeats, and length validation**
-**Module 2: Boundary refinement and target site duplication (TSD) verification**
-**Module 3: Insertion Time Calculation**
+**Module 2: boundary refinement and target site duplication (TSD) verification**
+**Module 3: calculation of LTR divergence and filtering**
 **Module 4: Protein domain identification and classification**
-**Module 5: Screening for overlapping transposable elements and plant protein domains**
-**Module 6: Validation of insertion patterns and nested element detection**
+**Module 5: Filtering candidate with significant non-LTR sequence**
+**Module 6: Validation of nested insertion**
 
 
 ## Output Files
