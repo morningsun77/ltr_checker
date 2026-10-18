@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use ltr_checker, please cite it as below."
+title: "ltr_checker: a CNN-gated structural pipeline for LTR retrotransposon annotation"
+authors:
+  - family-names: Chen
+    given-names: Zhao-Yang
+version: 1.0.0
+date-released: 2026-09-10
+license: MIT
+repository-code: "https://github.com/<your-account>/ltr_checker"
+keywords:
+  - LTR retrotransposon
+  - transposable elements
+  - convolutional neural network
+  - genome annotation

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+test/out/
+test/smoke.log
+*.fai
+test/g.log

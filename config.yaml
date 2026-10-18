@@ -1,0 +1,14 @@
+# ltr_checker external-tool paths.
+#
+# ltr_finder (the raw LTR_Finder binary) and LtrDetector ship bundled under tools/ and
+# are the defaults below. A relative path is resolved against the package root (the
+# directory of ltr_checker.py), so it works from any working directory; leave a
+# bare binary name to find the tool on $PATH, or give an absolute path to override.
+# An environment variable of the same name wins over this file
+# (e.g.  export LTR_retriever=/opt/LTR_retriever/LTR_retriever).
+
+ltr_finder:    tools/LTR_FINDER_parallel/bin/LTR_FINDER.x86_64-1.0.7/ltr_finder   # bundled (raw LTR_Finder binary; driven directly, not via the perl wrapper)
+gt:            gt                                                                 # genometools from conda (suffixerator + ltrharvest)
+LtrDetector:   tools/LtrDetector/bin/LtrDetector                                  # bundled (prebuilt Linux x86_64; rebuild via tools/build_ltrdetector.sh)
+LTR_retriever: LTR_retriever                                                      # from conda env (optional intact stage)
+RepeatMasker:  RepeatMasker                                                       # from conda env (optional annotate stage)

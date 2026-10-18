@@ -1,0 +1,26 @@
+name: ltr_checker
+channels:
+  - pytorch
+  - bioconda
+  - conda-forge
+dependencies:
+  # --- Python runtime for the driver + CNN gate ---
+  - python=3.9
+  - pytorch                 # CPU build is fine; install the CUDA build for --device cuda
+  - numpy
+  - biopython
+  - pandas
+  - tqdm
+  # --- external annotation tools ---
+  - genometools-genometools # provides `gt` (suffixerator + ltrharvest) for the candidate set
+  - perl                    # required by LTR_retriever (optional intact stage)
+  - ltr_retriever           # optional: intact stage (--stage intact)
+  - repeatmasker            # optional: annotate stage (--stage annotate)
+  # LTR_Finder and LtrDetector are NOT on bioconda, so they ship bundled under tools/ and
+  # are used by default (no separate download needed):
+  #   tools/LTR_FINDER_parallel/bin/.../ltr_finder  (raw LTR_Finder binary, driven directly)
+  #   tools/LtrDetector/bin/LtrDetector             (prebuilt Linux x86_64 binary)
+  # If the prebuilt LtrDetector will not run on your platform, rebuild it with a
+  # C++ compiler via tools/build_ltrdetector.sh (uncomment the two lines below):
+  # - make
+  # - cxx-compiler
