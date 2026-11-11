@@ -18,7 +18,7 @@ import torch.nn.functional as F
 from model import DETECT
 from sequence_utils import genome_dict, ltr_range
 
-# ASCII -> code (A,C,G,T,N -> 0..4 ; everything else -> 4/N), matches model.fasta2one_hot
+# ASCII -> code (A,C,G,T,N -> 0..4 ; everything else -> 4/N)
 LUT = np.full(256, 4, dtype=np.int64)
 for ch, code in zip("ACGTN", range(5)):
     LUT[ord(ch)] = code
@@ -48,10 +48,14 @@ def main():
     ap.add_argument("--genome", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--name", required=True, help="output prefix, e.g. rice / maize")
-    ap.add_argument("--model", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "model", "model_cnn.pth"))
+    ap.add_argument("--model", default=os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "model", "model_cnn.pth"),
+        help="CNN weights (default: the bundled model/model_cnn.pth at the package root)")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--stride", type=int, default=10000)
     ap.add_argument("--win", type=int, default=50000)
+    ap.add_argument("--pad", type=int, default=0,
+                    help="symmetric safety margin (bp) added to both sides of each candidate region")
     ap.add_argument("--batch", type=int, default=128)
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -61,9 +65,10 @@ def main():
         print("[WARN] cuda requested but not available -> falling back to cpu", flush=True)
         device = "cpu"
 
-    model = DETECT()
+    model = DETECT(win=args.win)   # first Linear dim scales with window width
     model.load_state_dict(torch.load(args.model, map_location="cpu"))
     model.eval().to(device)
+    print(f"[INFO] win={args.win} pad={args.pad} stride={args.stride} model={args.model}", flush=True)
 
     if device == "cuda":  # verify the GPU arch is supported by this torch build; else fall back
         try:
@@ -90,7 +95,7 @@ def main():
                 fs.write(f"{chrom}\t{L}\t0\t0\t0.0000\t0.0\n"); continue
             codes = encode_chrom(seq)
             preds = predict_chrom(codes, model, device, args.stride, args.win, args.batch)
-            regions = ltr_range(chrom, [preds], L, args.stride)  # list of "chr\tstart\tend"
+            regions = ltr_range(chrom, [preds], L, args.stride, win=args.win, pad=args.pad)  # "chr\tstart\tend"
             rbp = 0
             for r in regions:
                 c, s, e = r.split("\t")

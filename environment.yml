@@ -9,18 +9,20 @@ dependencies:
   - pytorch                 # CPU build is fine; install the CUDA build for --device cuda
   - numpy
   - biopython
-  - pandas
   - tqdm
   # --- external annotation tools ---
+  - ltr_finder              # raw LTR_Finder binary (bioconda v1.07), driven directly
   - genometools-genometools # provides `gt` (suffixerator + ltrharvest) for the candidate set
+  - samtools                # `samtools faidx` to build the .fai needed for candidates.fasta
   - perl                    # required by LTR_retriever (optional intact stage)
   - ltr_retriever           # optional: intact stage (--stage intact)
   - repeatmasker            # optional: annotate stage (--stage annotate)
-  # LTR_Finder and LtrDetector are NOT on bioconda, so they ship bundled under tools/ and
-  # are used by default (no separate download needed):
-  #   tools/LTR_FINDER_parallel/bin/.../ltr_finder  (raw LTR_Finder binary, driven directly)
-  #   tools/LtrDetector/bin/LtrDetector             (prebuilt Linux x86_64 binary)
-  # If the prebuilt LtrDetector will not run on your platform, rebuild it with a
-  # C++ compiler via tools/build_ltrdetector.sh (uncomment the two lines below):
+  # LtrDetector is NOT on bioconda, so it ships bundled under tools/ and is used by default
+  # (no separate download needed): tools/LtrDetector/bin/LtrDetector (prebuilt Linux x86_64).
+  # If the prebuilt LtrDetector will not run on your platform, rebuild it with a C++ compiler
+  # via tools/build_ltrdetector.sh (uncomment the two lines below):
   # - make
   # - cxx-compiler
+  #
+  # ltr_finder above is cross-platform via bioconda; a prebuilt x86_64 copy is also bundled
+  # under tools/ and used automatically if ltr_finder is not on $PATH.

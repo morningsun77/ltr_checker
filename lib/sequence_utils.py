@@ -1,5 +1,11 @@
 from Bio import SeqIO
 # define a dict for genome (keys: chromosome's id, values: chromosome's sequence)
+#
+# NOTE (known limitation): this loads the ENTIRE genome into memory as Python strings,
+# and the CNN gate (cnn_gate.py) holds it for the whole run. Peak memory therefore
+# scales with genome size (~1 byte/bp plus Python overhead), so a multi-Gb plant genome
+# can exhaust RAM. For such genomes, run the gate per chromosome (split the FASTA and
+# run ltr_checker on each) rather than on the whole assembly at once. See README.
 def genome_dict(file):
     seqfile = [x for x in SeqIO.parse(file, 'fasta')]
     genome = dict()
@@ -29,36 +35,17 @@ def split_num_l(num_lst):
     split_lst.append(tmp_lst)
     return split_lst
 
-def split_ltr_range(list):
-    result = []
-    for txt in list:
-        txt = txt.split('\t')
-        End = int(txt[2])
-        Start = int(txt[1])
-        if End - Start > 100000000:
-            distance = End - Start
-            num = distance // 10
-            for Num in range(0, num*10, num):
-                Start = Start + Num
-                End = Num + num
-                result.append(txt[0] + '\t' + str(Start) + '\t' + str(End))
-                Start = int(txt[1])
-                End = int(txt[2])
-        elif End - Start < 100000000 and End - Start > 50000000:
-            distance = End - Start
-            num = distance // 2
-            for Num in range(0, num*2, num):
-                Start = Start + Num
-                End = num + Num
-                result.append(txt[0] + '\t' + str(Start) + '\t' + str(End))
-                Start = int(txt[1])
-                End = int(txt[2])
-        else:
-            result.append(txt[0] + '\t' + str(Start) + '\t' + str(End))
-    return result
-
-# transform predict's results to position information
-def ltr_range(chr_id,list_result,length,slide):
+# transform the CNN window predictions into genome position ranges
+def ltr_range(chr_id,list_result,length,slide,win=50000,pad=0):
+    # `win` is the CNN detection window width (bp). A positive window at index i
+    # spans [i*slide, i*slide + win], so a run of positive windows extends by the
+    # full window width past its last start. `win`/`slide` were previously hard-coded
+    # to 50000/10000; they are now parameters so the 15/20/25/30 kb retrained gates
+    # can be used. `pad` (bp) is a symmetric safety margin added to BOTH sides of
+    # every block before clamping/merging: the CNN only guarantees an element midpoint
+    # lies in a positive window, not that the whole element (+ TSD/TG..CA flank the
+    # tools need) fits the block; pad = max_LTR_separation//2 fully encloses any such
+    # element. default pad=0 = legacy pure-window-union behaviour.
     new_result = sum(list_result,[])
     num = 0
     temp = []
@@ -68,51 +55,44 @@ def ltr_range(chr_id,list_result,length,slide):
         num += 1
     res = []
     if len(temp) == 1:
-        start = temp[0] * slide 
-        end = temp[-1] * slide + 50000
+        start = temp[0] * slide
+        end = temp[-1] * slide + win
         l = chr_id + "\t" + str(start) + "\t" + str(end)
         res.append(l)
     elif len(temp) == 0:
-        
-        l = chr_id + "has no LTR_RT."
+        pass  # no positive window on this chromosome -> no regions (res stays [])
     elif len(temp) > 1:
         consistent_list = split_num_l(temp)
         if len(consistent_list) >= 2:
             for i in range(1,len(consistent_list),1):
-                if consistent_list[i][0] - consistent_list[i-1][-1] > int(50000 // slide):
-                    start = consistent_list[i-1][0] * slide 
-                    end = consistent_list[i-1][-1] * slide + 50000
-                    l = chr_id + "\t" + str(start) + "\t" + str(end)
-                    res.append(l)
-                elif consistent_list[i][0] - consistent_list[i-1][-1] <= int(50000 // slide) and consistent_list[i][0] - consistent_list[i-1][-1] >=2:
+                if consistent_list[i][0] - consistent_list[i-1][-1] > int(win // slide):
                     start = consistent_list[i-1][0] * slide
-                    # Bug fix: extend by the full window width (50000), not one stride
-                    # (10000). The previous +10000 truncated 40 kb off the region end
-                    # whenever two positive-window runs were 2-5 windows apart, clipping
-                    # real intact LTR-RTs (~11% of elements) that the CNN had flagged.
-                    end = consistent_list[i-1][-1] * slide + 50000
+                    end = consistent_list[i-1][-1] * slide + win
                     l = chr_id + "\t" + str(start) + "\t" + str(end)
                     res.append(l)
+                elif consistent_list[i][0] - consistent_list[i-1][-1] <= int(win // slide) and consistent_list[i][0] - consistent_list[i-1][-1] >=2:
+                    start = consistent_list[i-1][0] * slide
+                    # Extend by the full window width (win): the run's last positive
+                    # window itself spans [last*slide, last*slide+win], so truncating
+                    # to +slide would clip real intact LTR-RTs the CNN flagged.
+                    end = consistent_list[i-1][-1] * slide + win
+                    l = chr_id + "\t" + str(start) + "\t" + str(end)
+                    res.append(l)
+            # Final run: end at its last window's right edge like every other run.
+            # (Previously forced to `length`, stretching the last block unbounded to
+            #  the chromosome end -- removed; pad below gives the safety margin.)
             start = consistent_list[-1][0] * slide
-            end = consistent_list[-1][-1] * slide + 50000
-            if i == len(consistent_list) - 1:
-                end = length
+            end = consistent_list[-1][-1] * slide + win
             l = chr_id + "\t" + str(start) + "\t" + str(end)
             res.append(l)
         elif len(consistent_list) == 1:
-            start = consistent_list[0][0] * 10000
-            end = consistent_list[0][-1] * 10000 + 50000
+            start = consistent_list[0][0] * slide
+            end = consistent_list[0][-1] * slide + win
             l = chr_id + "\t" + str(start) + "\t" + str(end)
             res.append(l)
     if res == []:
         result = []
     else:
-        # LTR_FINDER_parallel does its own fixed 5Mb splitting on each candidate region,
-        # so the legacy split_ltr_range() large-block chopping is redundant here. It is
-        # also skipped because it produces malformed (start>end) coordinates on very
-        # large regions (e.g. a high-recall gate flagging ~100% of a chromosome), which
-        # would drop those regions. Hand the merged regions straight to the annotator.
-        #
         # Merge overlapping/adjacent regions before returning: after each positive-window
         # run is extended by the full 50 kb window, neighbouring runs overlap, and an
         # unmerged mask would extract the same sub-sequence more than once -> duplicate
@@ -121,7 +101,7 @@ def ltr_range(chr_id,list_result,length,slide):
         ivs = []
         for l in res:
             _c, s, e = l.split("\t")
-            s = max(0, int(s)); e = min(length, int(e))
+            s = max(0, int(s) - pad); e = min(length, int(e) + pad)
             if e > s:
                 ivs.append((s, e))
         ivs.sort()

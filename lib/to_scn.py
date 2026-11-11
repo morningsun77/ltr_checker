@@ -23,8 +23,8 @@ def load_map(mapf):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--tool", required=True, choices=["finder", "harvest", "detector", "look4ltrs"])
-    ap.add_argument("--raw", required=True, help="raw file or run dir (detector/look4ltrs)")
+    ap.add_argument("--tool", required=True, choices=["finder", "harvest", "detector"])
+    ap.add_argument("--raw", required=True, help="raw file or run dir (detector)")
     ap.add_argument("--map", required=True)
     ap.add_argument("--chrom-order", required=True, help="chroms.txt (order = seq-nr)")
     ap.add_argument("--out", required=True)
@@ -43,21 +43,31 @@ def main():
         rs, re = off + rs, off + re
         rows.append((ci, es, ee, ls, le, rs, re, sim))
 
+    n_malformed = 0
     if a.tool == "finder":
         with open(a.raw) as fh:
             for line in fh:
                 if not line.startswith("["):
                     continue
                 c = line.rstrip("\n").split("\t")
-                rid = c[1].split()[0]
-                if rid not in by_id:
+                # Guard the whole row parse (like the detector/look4ltrs branches): one
+                # malformed ltr_finder line (short columns, non-numeric coords, missing
+                # '-') must not crash the stage, which runs to_scn.py with check=True.
+                try:
+                    rid = c[1].split()[0]
+                    if rid not in by_id:
+                        continue
+                    chrom, off = by_id[rid]
+                    s, e = [int(x) for x in c[2].split("-")]
+                    ll, rl = [int(x) for x in c[3].split(",")[:2]]
+                    sim = 100.0
+                    try:
+                        sim = float(c[-1]) * (100 if float(c[-1]) <= 1 else 1)
+                    except ValueError:
+                        pass
+                except (IndexError, ValueError):
+                    n_malformed += 1
                     continue
-                chrom, off = by_id[rid]
-                s, e = [int(x) for x in c[2].split("-")]
-                ll, rl = [int(x) for x in c[3].split(",")[:2]]
-                sim = 100.0
-                try: sim = float(c[-1]) * (100 if float(c[-1]) <= 1 else 1)
-                except Exception: pass
                 add(chrom, off, s, e, s, s + ll - 1, e - rl + 1, e, sim)
 
     elif a.tool == "harvest":
@@ -94,30 +104,20 @@ def main():
                     continue
                 add(chrom, off, es, ee, ls, le, rs, re, sim)
 
-    elif a.tool == "look4ltrs":
-        rtrs = glob.glob(os.path.join(a.raw, "Rtr", "*.rtr")) if os.path.isdir(a.raw) else [a.raw]
-        for rtr in rtrs:
-            for line in open(rtr):
-                c = line.rstrip("\n").split("\t")
-                if not c or c[0] in ("chrom", "") or len(c) < 6:
-                    continue
-                rid = c[0]
-                if rid not in by_id or "NA" in (c[2], c[3], c[4], c[5]):
-                    continue
-                chrom, off = by_id[rid]
-                try:
-                    ls, le, rs, re = int(c[2]), int(c[3]), int(c[4]), int(c[5])
-                    sim = float(c[15]) * 100 if len(c) > 15 and c[15] not in ("NA", "") else 90.0
-                except ValueError:
-                    continue
-                add(chrom, off, ls, re, ls, le, rs, re, sim)   # element = LeftStart..RightEnd
-
     # emit sorted, valid (s<e, ltrs ordered)
     good = []
+    n_bad_order = 0
     for ci, es, ee, ls, le, rs, re, sim in rows:
         if es < ee and ls <= le < rs <= re:
             good.append((ci, es, ee, ls, le, rs, re, sim))
+        else:
+            n_bad_order += 1
     good.sort()
+    if n_malformed or n_bad_order:
+        sys.stderr.write(
+            f"[to_scn] {a.tool}: dropped {n_malformed} malformed row(s) and "
+            f"{n_bad_order} element(s) with inconsistent LTR coordinate order "
+            f"(kept {len(good)})\n")
     with open(a.out, "w") as oh:
         oh.write("# normalized to LTRharvest .scn (genome coords) from tool=%s\n" % a.tool)
         oh.write("# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim seq-nr\n")

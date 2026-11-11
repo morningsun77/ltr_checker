@@ -1,14 +1,31 @@
-# ltr_checker external-tool paths.
+# ltr_checker configuration: external-tool paths + tunable parameters.
 #
-# ltr_finder (the raw LTR_Finder binary) and LtrDetector ship bundled under tools/ and
-# are the defaults below. A relative path is resolved against the package root (the
-# directory of ltr_checker.py), so it works from any working directory; leave a
-# bare binary name to find the tool on $PATH, or give an absolute path to override.
-# An environment variable of the same name wins over this file
-# (e.g.  export LTR_retriever=/opt/LTR_retriever/LTR_retriever).
+# TOOL PATHS
+# Each value is resolved as: an absolute path is used as-is; a relative path (one that
+# contains a "/") is resolved against the package root (the directory of ltr_checker.py),
+# so it works from any working directory; a bare binary name is found on $PATH. For the two
+# tools that ship bundled under tools/ (ltr_finder, LtrDetector), a bare name that is NOT on
+# $PATH falls back automatically to the bundled binary. An environment variable of the same
+# name wins over this file (e.g.  export LTR_retriever=/opt/LTR_retriever/LTR_retriever).
+#
+# ltr_finder is on bioconda (v1.07); install it with the env and it is found on $PATH on any
+# platform. LtrDetector is NOT on bioconda, so it ships bundled (prebuilt Linux x86_64;
+# rebuild for other platforms via tools/build_ltrdetector.sh).
 
-ltr_finder:    tools/LTR_FINDER_parallel/bin/LTR_FINDER.x86_64-1.0.7/ltr_finder   # bundled (raw LTR_Finder binary; driven directly, not via the perl wrapper)
-gt:            gt                                                                 # genometools from conda (suffixerator + ltrharvest)
-LtrDetector:   tools/LtrDetector/bin/LtrDetector                                  # bundled (prebuilt Linux x86_64; rebuild via tools/build_ltrdetector.sh)
-LTR_retriever: LTR_retriever                                                      # from conda env (optional intact stage)
-RepeatMasker:  RepeatMasker                                                       # from conda env (optional annotate stage)
+ltr_finder:    ltr_finder      # bioconda (raw LTR_Finder binary, driven directly) or bundled x86_64 fallback
+gt:            gt              # genometools from conda (suffixerator + ltrharvest)
+LtrDetector:   LtrDetector     # bundled under tools/ (prebuilt Linux x86_64); not on bioconda
+LTR_retriever: LTR_retriever   # from conda env (optional intact stage)
+RepeatMasker:  RepeatMasker    # from conda env (optional annotate stage)
+
+# SCIENTIFIC PARAMETERS
+# Exposed here (rather than hardcoded in the code) so they are tunable and traceable.
+# The structural limits (element/LTR length, identity) and the CNN window geometry stay on
+# the command line (see --help); these are the per-tool knobs.
+ltrharvest_vic:    10    # LTRharvest -vic    : max TSD search radius (bp)
+ltrharvest_seed:   20    # LTRharvest -seed   : min seed length for the LTR pair
+ltr_finder_p:      20    # ltr_finder -p      : PBS/PPT search range
+ltr_finder_trna:         # ltr_finder -s      : optional tRNA FASTA for PBS detection (empty = off);
+                         #   e.g. tools/LTR_FINDER_parallel/bin/LTR_FINDER.x86_64-1.0.7/tRNAdb/Os-tRNAs.fa
+rm_div:            40    # RepeatMasker -div    : max divergence (both annotate presets)
+rm_cutoff:        225    # RepeatMasker -cutoff : Smith-Waterman cutoff (hite preset only)

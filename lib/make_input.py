@@ -57,6 +57,13 @@ def main():
                     help="overlap between pieces (bp); must exceed the largest element")
     args = ap.parse_args()
 
+    # Guard against a degenerate piece step: if overlap >= chunk, step = chunk - overlap
+    # would be <= 0 and pieces() would advance 1 bp at a time, cutting a sequence into one
+    # piece per base. Fail loudly instead of silently producing millions of 1-bp records.
+    if args.chunk > 0 and args.overlap >= args.chunk:
+        sys.exit(f"[make_input] ERROR: --overlap ({args.overlap}) must be smaller than "
+                 f"--chunk ({args.chunk}); otherwise the piece step is non-positive")
+
     keep = set(args.chroms.split(",")) if args.chroms else None
     indir = os.path.join(args.outdir, "input_dir")
     os.makedirs(indir, exist_ok=True)
